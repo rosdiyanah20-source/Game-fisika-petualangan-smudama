@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MISSION GERAK: PETUALANGAN FISIKA SMUDAMA</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Orbitron -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            user-select: none;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .glow-button {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+        .glow-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(129, 140, 248, 0.8);
+        }
+        .glow-card {
+            transition: all 0.3s ease;
+        }
+        .glow-card:hover {
+            border-color: #818cf8;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+        .pulse-heart {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="p-2 sm:p-4 md:p-6 flex flex-col justify-between min-h-screen">
+
+    <!-- PLAYER DASHBOARD (HEADER) -->
+    <header id="playerDashboard" class="hidden glass-panel rounded-2xl p-4 mb-6 transition-all duration-500 sticky top-2 z-50">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Profile & Avatar Info -->
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center space-x-3">
+                    <div id="dashAvatar" class="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-2xl border-2 border-indigo-300 shadow-lg">
+                        🧑‍🎓
+                    </div>
+                    <div>
+                        <h2 id="dashName" class="font-bold text-lg text-indigo-200 leading-tight">Fisika Explorer</h2>
+                        <span id="dashLevel" class="text-xs px-2 py-0.5 rounded-full bg-indigo-900/80 text-indigo-300 font-semibold border border-indigo-500/30">
+                            LEVEL 1: PEMULA
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Quick Sound Toggle -->
+                <button onclick="toggleAudio()" class="md:hidden text-slate-400 hover:text-amber-400 text-xl p-2">
+                    <i id="soundIconMob" class="fas font-solid fa-volume-high"></i>
+                </button>
+            </div>
+
+            <!-- Stats Center: Hearts, XP, Coin, Badges -->
+            <div class="flex items-center justify-around w-full md:w-auto space-x-2 sm:space-x-6 bg-slate-900/60 py-2 px-4 rounded-xl border border-slate-700/50">
+                <div class="flex items-center space-x-1" title="Energi Pemain">
+                    <span class="text-red-500 text-xl pulse-heart">❤️</span>
+                    <span id="dashHearts" class="font-bold text-lg text-slate-100">3</span>
+                </div>
+                <div class="h-6 w-px bg-slate-700"></div>
+                <div class="flex items-center space-x-1" title="XP (Experience Points)">
+                    <span class="text-amber-400 text-xl">⭐</span>
+                    <span id="dashXP" class="font-bold text-lg text-amber-300 font-orbitron">0 XP</span>
+                </div>
+                <div class="h-6 w-px bg-slate-700"></div>
+                <div class="flex items-center space-x-1" title="Koin Kristal">
+                    <span class="text-yellow-400 text-xl">🪙</span>
+                    <span id="dashCoins" class="font-bold text-lg text-yellow-300 font-orbitron">0</span>
+                </div>
+                <div class="h-6 w-px bg-slate-700"></div>
+                <div class="flex items-center space-x-1" title="Badge Terkumpul">
+                    <span class="text-emerald-400 text-xl">🏅</span>
+                    <span id="dashBadgeCount" class="font-bold text-lg text-emerald-300">0/6</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full md:w-48 flex flex-col justify-center">
+                <div class="flex justify-between text-xs text-slate-300 mb-1 font-semibold">
+                    <span>PROGRESS PETA</span>
+                    <span id="dashProgressPct">0%</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-3 p-0.5 border border-slate-700">
+                    <div id="dashProgressBar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <button onclick="toggleAudio()" class="hidden md:block text-slate-400 hover:text-amber-400 text-xl p-2 transition">
+                <i id="soundIcon" class="fas font-solid fa-volume-high"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APPLICATION CONTAINER -->
+    <main class="max-w-5xl mx-auto w-full my-auto">
+
+        <!-- SCREEN 1: WELCOME & START SCREEN -->
+        <section id="screenWelcome" class="glass-panel rounded-3xl p-6 sm:p-10 text-center relative overflow-hidden transition-all duration-500">
+            <div class="absolute -top-24 -right-24 w-72 h-72 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="inline-block px-4 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs sm:text-sm font-semibold tracking-wide uppercase mb-4">
+                🎮 Game Pembelajaran Fisika Kelas X • Fase E
+            </div>
+
+            <h1 class="text-3xl sm:text-5xl font-extrabold font-orbitron tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-sky-300 to-emerald-300 mb-3">
+                MISSION GERAK
+            </h1>
+            <p class="text-xl sm:text-2xl font-semibold text-slate-200 mb-6 italic">
+                “Petualangan Fisika SMUDAMA”
+            </p>
+
+            <div class="max-w-xl mx-auto bg-slate-900/60 p-5 rounded-2xl border border-slate-700/60 mb-8 text-left text-sm sm:text-base text-slate-300 leading-relaxed space-y-3">
+                <p class="flex items-start">
+                    <span class="text-amber-400 mr-2 text-lg">⚠️</span>
+                    <span><strong>DARURAT SMUDAMA!</strong> Sistem energi gerak di kota sekolah berasrama kita mengalami gangguan total. "Kristal Gerak" kehilangan seluruh energinya!</span>
+                </p>
+                <p class="flex items-start">
+                    <span class="text-sky-400 mr-2 text-lg">🧭</span>
+                    <span>Sebagai <strong>Fisika Explorer</strong>, jelajahi 5 zona ikonik SMUDAMA, selesaikan tantangan gerak lurus, kumpulkan 5 Kristal Gerak, dan buka gerbang <strong>Kastel Gerak</strong>!</span>
+                </p>
+            </div>
+
+            <!-- Input Form -->
+            <div class="max-w-md mx-auto space-y-5 text-left bg-slate-800/80 p-6 rounded-2xl border border-indigo-500/30 shadow-xl mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Nama Fisika Explorer:</label>
+                    <input type="text" id="inputPlayerName" placeholder="Masukkan Nama Kamu..." maxlength="20" class="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/50 transition">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Pilih Avatar Explorer:</label>
+                    <div class="grid grid-cols-4 gap-3">
+                        <button type="button" onclick="selectAvatar('🧑‍🎓')" class="avatar-btn p-3 rounded-xl bg-slate-700/80 hover:bg-indigo-600 border-2 border-indigo-500 text-3xl transition flex items-center justify-center">🧑‍🎓</button>
+                        <button type="button" onclick="selectAvatar('👩‍🎓')" class="avatar-btn p-3 rounded-xl bg-slate-700/80 hover:bg-indigo-600 border-2 border-transparent text-3xl transition flex items-center justify-center">👩‍🎓</button>
+                        <button type="button" onclick="selectAvatar('🏃‍♂️')" class="avatar-btn p-3 rounded-xl bg-slate-700/80 hover:bg-indigo-600 border-2 border-transparent text-3xl transition flex items-center justify-center">🏃‍♂️</button>
+                        <button type="button" onclick="selectAvatar('🚴‍♀️')" class="avatar-btn p-3 rounded-xl bg-slate-700/80 hover:bg-indigo-600 border-2 border-transparent text-3xl transition flex items-center justify-center">🚴‍♀️</button>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="glow-button px-8 py-4 bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-extrabold text-lg rounded-2xl shadow-xl transform active:scale-95 transition-all flex items-center justify-center mx-auto space-x-3">
+                <span>MULAI PETUALANGAN</span>
+                <i class="fas fa-play text-amber-300"></i>
+            </button>
+        </section>
+
+        <!-- SCREEN 2: ADVENTURE MAP (6 LOCATIONS) -->
+        <section id="screenMap" class="hidden space-y-6">
+            <div class="text-center mb-4">
+                <h2 class="text-2xl sm:text-3xl font-extrabold font-orbitron text-indigo-200">PETA PETUALANGAN SMUDAMA</h2>
+                <p class="text-slate-400 text-sm">Pilih zona yang terbuka untuk memulai tantangan petualangan fisika.</p>
+            </div>
+
+            <!-- Map Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                
+                <!-- Zone 1: Asrama Fisika -->
+                <div id="cardZone1" onclick="openZone(1)" class="glow-card glass-panel p-5 rounded-2xl cursor-pointer border border-emerald-500/50 bg-indigo-950/40 hover:bg-indigo-900/50 relative overflow-hidden group">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-4xl p-2 rounded-xl bg-slate-800/80 border border-slate-700">🏠</span>
+                        <span id="badgeZone1" class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
+                            TERBUKA
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white group-hover:text-indigo-300 transition">1. ASRAMA FISIKA</h3>
+                    <p class="text-xs text-indigo-300 font-semibold mb-2">Materi: Posisi, Jarak & Perpindahan</p>
+                    <p class="text-xs text-slate-400 line-clamp-2">Memahami titik acuan dan menghitung lintasan dari Asrama menuju Lapangan.</p>
+                    <div class="mt-4 flex items-center justify-between text-xs font-semibold text-slate-300 pt-3 border-t border-slate-700/60">
+                        <span>Reward: 💎 Kristal 1</span>
+                        <span class="text-amber-400">+20 XP</span>
+                    </div>
+                </div>
+
+                <!-- Zone 2: Lapangan Gerak -->
+                <div id="cardZone2" class="glow-card glass-panel p-5 rounded-2xl border border-slate-800 bg-slate-900/40 opacity-60 cursor-not-allowed relative overflow-hidden group">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-4xl p-2 rounded-xl bg-slate-800/80 border border-slate-700">🏃</span>
+                        <span id="badgeZone2" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-bold">
+                            🔒 TERKUNCI
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white group-hover:text-indigo-300 transition">2. LAPANGAN GERAK</h3>
+                    <p class="text-xs text-indigo-300 font-semibold mb-2">Materi: Kelajuan & Kecepatan</p>
+                    <p class="text-xs text-slate-400 line-clamp-2">Menganalisis pelari mengelilingi lapangan dengan waktu & kelajuan rata-rata.</p>
+                    <div class="mt-4 flex items-center justify-between text-xs font-semibold text-slate-300 pt-3 border-t border-slate-700/60">
+                        <span>Reward: 💎 Kristal 2</span>
+                        <span class="text-amber-400">+20 XP</span>
+                    </div>
+                </div>
+
+                <!-- Zone 3: Jalur GLB -->
+                <div id="cardZone3" class="glow-card glass-panel p-5 rounded-2xl border border-slate-800 bg-slate-900/40 opacity-60 cursor-not-allowed relative overflow-hidden group">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-4xl p-2 rounded-xl bg-slate-800/80 border border-slate-700">🚲</span>
+                        <span id="badgeZone3" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-bold">
+                            🔒 TERKUNCI
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white group-hover:text-indigo-300 transition">3. JALUR GLB</h3>
+                    <p class="text-xs text-indigo-300 font-semibold mb-2">Materi: Gerak Lurus Beraturan</p>
+                    <p class="text-xs text-slate-400 line-clamp-2">Simulasi sepeda melaju konstan, tabel waktu-jarak, dan grafik linier.</p>
+                    <div class="mt-4 flex items-center justify-between text-xs font-semibold text-slate-300 pt-3 border-t border-slate-700/60">
+                        <span>Reward: 💎 Kristal 3</span>
+                        <span class="text-amber-400">+30 XP</span>
+                    </div>
+                </div>
+
+                <!-- Zone 4: Tikungan GLBB -->
+                <div id="cardZone4" class="glow-card glass-panel p-5 rounded-2xl border border-slate-800 bg-slate-900/40 opacity-60 cursor-not-allowed relative overflow-hidden group">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-4xl p-2 rounded-xl bg-slate-800/80 border border-slate-700">🚗</span>
+                        <span id="badgeZone4" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-bold">
+                            🔒 TERKUNCI
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white group-hover:text-indigo-300 transition">4. TIKUNGAN GLBB</h3>
+                    <p class="text-xs text-indigo-300 font-semibold mb-2">Materi: Gerak Berubah Beraturan</p>
+                    <p class="text-xs text-slate-400 line-clamp-2">Simulasi mobil sekolah yang mengalami percepatan saat melintasi jalan raya.</p>
+                    <div class="mt-4 flex items-center justify-between text-xs font-semibold text-slate-300 pt-3 border-t border-slate-700/60">
+                        <span>Reward: 💎 Kristal 4</span>
+                        <span class="text-amber-400">+30 XP</span>
+                    </div>
+                </div>
+
+                <!-- Zone 5: Menara Grafik -->
+                <div id="cardZone5" class="glow-card glass-panel p-5 rounded-2xl border border-slate-800 bg-slate-900/40 opacity-60 cursor-not-allowed relative overflow-hidden group">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-4xl p-2 rounded-xl bg-slate-800/80 border border-slate-700">📈</span>
+                        <span id="badgeZone5" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-bold">
+                            🔒 TERKUNCI
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white group-hover:text-indigo-300 transition">5. MENARA GRAFIK</h3>
+                    <p class="text-xs text-indigo-300 font-semibold mb-2">Materi: Menganalisis Grafik Gerak</p>
+                    <p class="text-xs text-slate-400 line-clamp-2">Deteksi visual hubungan grafik s-t dan v-t pada benda diam, GLB, dan GLBB.</p>
+                    <div class="mt-4 flex items-center justify-between text-xs font-semibold text-slate-300 pt-3 border-t border-slate-700/60">
+                        <span>Reward: 💎 Kristal 5</span>
+                        <span class="text-amber-400">+40 XP</span>
+                    </div>
+                </div>
+
+                <!-- Zone 6: Kastel Gerak (Final) -->
+                <div id="cardZone6" class="glow-card glass-panel p-5 rounded-2xl border border-slate-800 bg-slate-900/40 opacity-60 cursor-not-allowed relative overflow-hidden group border-amber-500/30">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="text-4xl p-2 rounded-xl bg-amber-950/60 border border-amber-500/30">🏆</span>
+                        <span id="badgeZone6" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-bold">
+                            🔒 TERKUNCI
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold text-amber-200 group-hover:text-amber-300 transition">6. KASTEL GERAK</h3>
+                    <p class="text-xs text-amber-300/80 font-semibold mb-2">FINAL MISSION: TANTANGAN INTEGRATIF</p>
+                    <p class="text-xs text-slate-400 line-clamp-2">Selesaikan 5 ujian evaluasi gerak kontekstual untuk mengembalikan energi SMUDAMA!</p>
+                    <div class="mt-4 flex items-center justify-between text-xs font-semibold text-slate-300 pt-3 border-t border-slate-700/60">
+                        <span>Reward: 🏆 FISIKA EXPLORER</span>
+                        <span class="text-amber-400">+100 XP</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SCREEN 3: ACTIVE MISSION INTERACTION AREA -->
+        <section id="screenMission" class="hidden glass-panel rounded-3xl p-5 sm:p-8 space-y-6 relative">
+            
+            <!-- Top Mission Navigation Bar -->
+            <div class="flex items-center justify-between pb-4 border-b border-slate-700/70">
+                <button onclick="backToMap()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold rounded-xl border border-slate-600 transition flex items-center space-x-2">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Kembali ke Peta</span>
+                </button>
+                <div class="text-right">
+                    <span id="missionZoneTitle" class="text-xs font-bold text-indigo-400 uppercase tracking-widest block">ZONA 1</span>
+                    <h2 id="missionHeader" class="text-lg sm:text-2xl font-extrabold text-white">ASRAMA FISIKA</h2>
+                </div>
+            </div>
+
+            <!-- Story Line & Context -->
+            <div class="bg-indigo-950/50 border border-indigo-500/30 p-4 rounded-2xl flex items-start space-x-3 text-sm text-indigo-100">
+                <span class="text-2xl">📜</span>
+                <div>
+                    <strong class="text-amber-300">Cerita Misi:</strong>
+                    <p id="missionStory" class="mt-1 leading-relaxed text-slate-200">Loading cerita misi...</p>
+                </div>
+            </div>
+
+            <!-- Interactive Visual Workspace (Canvas & Dynamic Visuals) -->
+            <div id="visualWorkspace" class="bg-slate-900/90 rounded-2xl border border-slate-700 p-4 min-h-[220px] flex flex-col items-center justify-center relative overflow-hidden">
+                <!-- Canvas Element for Animations -->
+                <canvas id="missionCanvas" class="w-full h-52 bg-slate-950 rounded-xl border border-slate-800"></canvas>
+                <!-- Dynamic HTML Elements overlay (Tabel/Grafik) -->
+                <div id="dynamicHtmlOverlay" class="w-full mt-3 hidden"></div>
+            </div>
+
+            <!-- Question & Numeracy Challenge -->
+            <div id="questionContainer" class="bg-slate-900/60 p-5 rounded-2xl border border-slate-700 space-y-4">
+                <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm">
+                    <i class="fas fa-question-circle text-base"></i>
+                    <span>TANTANGAN NUMERASI & KONSEP FISIKA</span>
+                </div>
+                <p id="questionText" class="text-base sm:text-lg font-semibold text-white leading-snug">
+                    Loading pertanyaan...
+                </p>
+
+                <!-- Options Grid -->
+                <div id="optionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <!-- Dynamic Buttons Inserted Here -->
+                </div>
+            </div>
+
+            <!-- Helper Action Toolbar (Petunjuk, Materi, Rumus) -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="showClue()" class="px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5">
+                        <span>💡 Petunjuk</span>
+                    </button>
+                    <button onclick="showMaterial()" class="px-3.5 py-2 bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5">
+                        <span>📖 Materi Brief</span>
+                    </button>
+                    <button onclick="showFormula()" class="px-3.5 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5">
+                        <span>🧮 Rumus</span>
+                    </button>
+                </div>
+                
+                <button id="btnRetryMission" onclick="retryCurrentMission()" class="hidden px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-500 rounded-xl text-xs sm:text-sm font-semibold transition">
+                    🔄 Coba Lagi Misi Ini
+                </button>
+            </div>
+
+            <!-- Feedback Display Box -->
+            <div id="feedbackBox" class="hidden p-4 rounded-2xl text-sm font-medium transition-all duration-300 border"></div>
+        </section>
+
+        <!-- SCREEN 4: FINAL RECAP & REFLECTION SCREEN -->
+        <section id="screenFinal" class="hidden glass-panel rounded-3xl p-6 sm:p-10 text-center space-y-8">
+            <div>
+                <span class="text-6xl animate-bounce inline-block mb-2">🎉</span>
+                <h1 class="text-3xl sm:text-5xl font-extrabold font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-emerald-300 to-indigo-300">
+                    MISI BERHASIL!
+                </h1>
+                <p class="text-lg text-emerald-300 font-semibold mt-1">
+                    Selamat, Fisika Explorer! Kristal Gerak SMUDAMA Telah Terkumpul!
+                </p>
+            </div>
+
+            <!-- Final Evaluation Stats Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
+                <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-700 text-center">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Total Score / XP</p>
+                    <p id="finalXP" class="text-2xl font-extrabold font-orbitron text-amber-300 mt-1">240 XP</p>
+                </div>
+                <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-700 text-center">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Akurasi Jawaban</p>
+                    <p id="finalAccuracy" class="text-2xl font-extrabold font-orbitron text-emerald-400 mt-1">100%</p>
+                </div>
+                <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-700 text-center">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Badges Diraih</p>
+                    <p id="finalBadges" class="text-2xl font-extrabold font-orbitron text-indigo-300 mt-1">6/6</p>
+                </div>
+                <div class="bg-slate-900/70 p-4 rounded-2xl border border-slate-700 text-center">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Predikat Pembelajaran</p>
+                    <p id="finalGrade" class="text-xl font-extrabold text-amber-400 mt-1">🌟 Sangat Baik</p>
+                </div>
+            </div>
+
+            <!-- Badges Showroom -->
+            <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800 max-w-3xl mx-auto text-left">
+                <h3 class="text-sm font-bold text-slate-300 mb-3 flex items-center">
+                    <span class="mr-2">🏅</span> Koleksi Badge Fisika Explorer SMUDAMA
+                </h3>
+                <div id="badgeShowroom" class="flex flex-wrap gap-2 sm:gap-3">
+                    <!-- Badges render dynamically -->
+                </div>
+            </div>
+
+            <!-- Educational Recommendation Box -->
+            <div id="evalRecommendation" class="max-w-3xl mx-auto bg-indigo-950/40 p-4 rounded-2xl border border-indigo-500/30 text-left text-xs sm:text-sm text-indigo-200">
+                <!-- Evaluation text dynamic -->
+            </div>
+
+            <!-- Interactive Reflection Form -->
+            <div class="max-w-3xl mx-auto bg-slate-900/80 p-6 rounded-2xl border border-slate-700 text-left space-y-5">
+                <h3 class="text-lg font-bold text-amber-300 border-b border-slate-700 pb-2">
+                    📝 REFLEKSI PEMBELAJARAN FISIKA
+                </h3>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-200 mb-2">
+                        1. Konsep apa saja yang merasa paling kamu kuasai? (Boleh centang lebih dari satu):
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-300">
+                        <label class="flex items-center space-x-2 bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60 cursor-pointer hover:bg-slate-800">
+                            <input type="checkbox" class="accent-indigo-500 w-4 h-4" checked>
+                            <span>Jarak & Perpindahan</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60 cursor-pointer hover:bg-slate-800">
+                            <input type="checkbox" class="accent-indigo-500 w-4 h-4" checked>
+                            <span>Kelajuan & Kecepatan</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60 cursor-pointer hover:bg-slate-800">
+                            <input type="checkbox" class="accent-indigo-500 w-4 h-4" checked>
+                            <span>Gerak Lurus Beraturan (GLB)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60 cursor-pointer hover:bg-slate-800">
+                            <input type="checkbox" class="accent-indigo-500 w-4 h-4" checked>
+                            <span>Gerak Lurus Berubah Beraturan (GLBB)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60 cursor-pointer hover:bg-slate-800 sm:col-span-2">
+                            <input type="checkbox" class="accent-indigo-500 w-4 h-4" checked>
+                            <span>Analisis Visual Grafik Gerak ($s-t$ dan $v-t$)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-200 mb-2">
+                        2. Tuliskan contoh penerapan Gerak Lurus yang kamu temukan dalam kehidupan sehari-hari di lingkungan sekolah/asrama:
+                    </label>
+                    <textarea rows="3" placeholder="Contoh: Saat saya berjalan lurus di koridor asrama menuju ruang makan dengan kecepatan konstan..." class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-indigo-400"></textarea>
+                </div>
+            </div>
+
+            <!-- Inspiring Final Message Box -->
+            <div class="max-w-3xl mx-auto bg-gradient-to-r from-indigo-900/60 via-purple-900/60 to-emerald-900/60 p-6 rounded-2xl border border-indigo-500/40 text-slate-200 text-left space-y-3 leading-relaxed text-sm sm:text-base">
+                <p class="italic text-amber-200">
+                    “Gerak ternyata ada di mana-mana. Saat kamu berjalan dari asrama, saat berlari di lapangan, saat menaiki kendaraan, bahkan saat melihat benda bergerak.”
+                </p>
+                <p>
+                    Sekarang kamu tidak hanya melihat gerak. Kamu bisa <strong>MENGUKURNYA</strong>, <strong>MENGHITUNGNYA</strong>, <strong>MEMBACA GRAFIKNYA</strong>, dan <strong>MENJELASKANNYA</strong> secara ilmiah.
+                </p>
+                <p class="font-extrabold text-emerald-300 text-center text-lg pt-2">
+                    SELAMAT! KAMU ADALAH SEORANG FISIKA EXPLORER SMUDAMA SEJATI! 🏆
+                </p>
+            </div>
+
+            <button onclick="restartGame()" class="glow-button px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-emerald-600 text-white font-bold rounded-2xl shadow-lg transition text-base inline-flex items-center space-x-2">
+                <i class="fas fa-rotate-right"></i>
+                <span>MAIN ULANG PETUALANGAN</span>
+            </button>
+        </section>
+
+    </main>
+
+    <!-- MODALS FOR CLUE, MATERIAL & FORMULA -->
+    <div id="modalOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-indigo-500/40 w-full max-w-lg rounded-3xl p-6 relative shadow-2xl space-y-4">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+                <i class="fas fa-xmark"></i>
+            </button>
+            <div id="modalHeader" class="flex items-center space-x-2 text-indigo-300 font-bold text-lg border-b border-slate-800 pb-3">
+                <!-- Modal Title -->
+            </div>
+            <div id="modalBody" class="text-sm text-slate-300 leading-relaxed max-h-[60vh] overflow-y-auto space-y-3 pr-1">
+                <!-- Content injected dynamically -->
+            </div>
+            <div class="pt-2 text-right">
+                <button onclick="closeModal()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-xs sm:text-sm">
+                    Tutup Modul
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* SOUND FX SYNTHESIZER USING WEB AUDIO API */
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playBeep(freq = 440, type = 'sine', duration = 0.1) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function playSuccessSound() {
+            playBeep(523.25, 'triangle', 0.1);
+            setTimeout(() => playBeep(659.25, 'triangle', 0.15), 100);
+            setTimeout(() => playBeep(783.99, 'triangle', 0.25), 200);
+        }
+
+        function playErrorSound() {
+            playBeep(220, 'sawtooth', 0.15);
+            setTimeout(() => playBeep(180, 'sawtooth', 0.25), 150);
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const icons = [document.getElementById('soundIcon'), document.getElementById('soundIconMob')];
+            icons.forEach(ic => {
+                if (ic) ic.className = soundEnabled ? 'fas font-solid fa-volume-high' : 'fas font-solid fa-volume-xmark text-red-400';
+            });
+        }
+
+        /* GLOBAL GAME STATE ENGINE */
+        const gameState = {
+            playerName: "Fisika Explorer",
+            avatar: "🧑‍🎓",
+            hearts: 3,
+            xp: 0,
+            coins: 0,
+            currentZone: 1,
+            maxUnlockedZone: 1,
+            clueLevel: 0,
+            totalCorrect: 0,
+            totalWrong: 0,
+            badges: [],
+            zoneProgress: [false, false, false, false, false, false],
+            subStepIndex: 0 // For multi-question zones like Kastel
+        };
+
+        const badgeDefinitions = {
+            1: { title: "Detektif Jarak", icon: "🏅", desc: "Menguasai Perbedaan Jarak & Perpindahan" },
+            2: { title: "Master Kecepatan", icon: "🏅", desc: "Paham Kelajuan vs Kecepatan Rata-rata" },
+            3: { title: "Master GLB", icon: "🏅", desc: "Menghitung & Menafsirkan Gerak Konstan" },
+            4: { title: "Master GLBB", icon: "🏅", desc: "Menguasai Percepatan & Kecepatan Akhir" },
+            5: { title: "Detektif Grafik", icon: "📈", desc: "Mampu Analisis Visual Grafik s-t & v-t" },
+            6: { title: "FISIKA EXPLORER", icon: "🏆", desc: "Penyelamat Energetik SMUDAMA Sejati" }
+        };
+
+        const missionsData = {
+            1: {
+                title: "ASRAMA FISIKA",
+                zoneTitle: "ZONA 1",
+                story: "Kamu berada di pintu depan asrama. Untuk mengaktifkan Kristal Gerak pertama, kamu harus berjalan 80 meter menuju lapangan utama sekolah, kemudian berbalik arah sejauh 30 meter menuju asrama untuk mengambil modul fisika yang tertinggal.",
+                materi: `
+                    <strong>POSISI, JARAK & PERPINDAHAN:</strong><br>
+                    • <strong>Titik Acuan:</strong> Lokasi awal pengukuran (dalam hal ini: Asrama).<br>
+                    • <strong>Jarak (s):</strong> Panjang seluruh lintasan yang ditempuh tanpa memperhitungkan arah (Besaran Skalar).<br>
+                    • <strong>Perpindahan (Δx):</strong> Perubahan posisi dari titik awal ke titik akhir dengan memperhitungkan arah (Besaran Vektor).
+                `,
+                formula: "Jarak = Total Lintasan | Perpindahan = Posisi Akhir - Posisi Awal",
+                clues: [
+                    "1. Perhatikan lintasan awal (80m) dan lintasan balik (30m).",
+                    "2. Jarak menghitung SEMUA meter yang dilangkahkan.",
+                    "3. Jarak = 80 m + 30 m = 110 m!"
+                ],
+                questions: [
+                    {
+                        text: "Berapakah TOTAL JARAK yang ditempuh siswa dari asrama?",
+                        options: [
+                            { label: "A. 30 m", correct: false },
+                            { label: "B. 50 m", correct: false },
+                            { label: "C. 80 m", correct: false },
+                            { label: "D. 110 m", correct: true }
+                        ],
+                        explanation: "Jarak adalah seluruh panjang lintasan: 80 m + 30 m = 110 m.",
+                        bonus: {
+                            text: "Bonus Tantangan: Berapakah BESAR PERPINDAHAN siswa dari posisi awal Asrama?",
+                            options: [
+                                { label: "A. 110 m ke arah asrama", correct: false },
+                                { label: "B. 50 m ke arah lapangan", correct: true },
+                                { label: "C. 30 m ke arah lapangan", correct: false },
+                                { label: "D. 0 m", correct: false }
+                            ],
+                            explanation: "Perpindahan = Posisi Akhir - Awal = 80 m - 30 m = 50 m menuju lapangan."
+                        }
+                    }
+                ]
+            },
+            2: {
+                title: "LAPANGAN GERAK",
+                zoneTitle: "ZONA 2",
+                story: "Kamu mengamati seorang siswa kelas X berlari mengelilingi lintasan lapangan sekolah SMUDAMA. Siswa menempuh total panjang lintasan 200 meter dalam kurun waktu 40 detik.",
+                materi: `
+                    <strong>KELAJUAN VS KECEPATAN:</strong><br>
+                    • <strong>Kelajuan Rata-Rata (v):</strong> Jarak total dibagi total waktu ($v = s / t$). Merupakan besaran skalar.<br>
+                    • <strong>Kecepatan Rata-Rata (v⃗):</strong> Perpindahan dibagi total waktu ($v⃗ = Δx / t$). Merupakan besaran vektor.
+                `,
+                formula: "v = s / t  (Kelajuan = Jarak / Waktu)",
+                clues: [
+                    "1. Ketahui besaran: Jarak (s) = 200 m, Waktu (t) = 40 s.",
+                    "2. Gunakan rumus kelajuan rata-rata v = s / t.",
+                    "3. Hitung: 200 / 40 = 5 m/s."
+                ],
+                questions: [
+                    {
+                        text: "Berapakah kelajuan rata-rata siswa saat berlari mengelilingi lapangan?",
+                        options: [
+                            { label: "A. 2 m/s", correct: false },
+                            { label: "B. 4 m/s", correct: false },
+                            { label: "C. 5 m/s", correct: true },
+                            { label: "D. 10 m/s", correct: false }
+                        ],
+                        explanation: "Kelajuan v = s / t = 200 m / 40 s = 5 m/s.",
+                        bonus: {
+                            text: "Konseptual: Jika siswa berlari persis 1 putaran penuh dan kembali ke titik awal star, berapakah PERPINDAHAN-nya?",
+                            options: [
+                                { label: "A. 200 m", correct: false },
+                                { label: "B. 100 m", correct: false },
+                                { label: "C. 5 m", correct: false },
+                                { label: "D. 0 m", correct: true }
+                            ],
+                            explanation: "Karena titik awal dan akhir sama persis, perubahan posisi (perpindahan) = 0 m."
+                        }
+                    }
+                ]
+            },
+            3: {
+                title: "JALUR GLB",
+                zoneTitle: "ZONA 3",
+                story: "Seorang siswa mengendarai sepeda listrik menyusuri koridor lurus SMUDAMA dengan kecepatan konstan/tetap sebesar 5 m/s selama 10 detik.",
+                materi: `
+                    <strong>GERAK LURUS BERATURAN (GLB):</strong><br>
+                    • Gerak benda pada lintasan lurus dengan kecepatan konstan (tetap).<br>
+                    • Percepatan pada GLB adalah nol ($a = 0$).<br>
+                    • Grafik Posisi-Waktu ($s-t$) berbentuk garis lurus miring ke atas.
+                `,
+                formula: "s = v × t  (Jarak = Kecepatan × Waktu)",
+                clues: [
+                    "1. Diketahui kecepatan v = 5 m/s dan waktu t = 10 s.",
+                    "2. Hubungan GLB: s = v × t.",
+                    "3. s = 5 × 10 = 50 meter."
+                ],
+                questions: [
+                    {
+                        text: "Berapakah total jarak yang ditempuh sepeda setelah melaju 10 detik?",
+                        options: [
+                            { label: "A. 15 m", correct: false },
+                            { label: "B. 25 m", correct: false },
+                            { label: "C. 50 m", correct: true },
+                            { label: "D. 100 m", correct: false }
+                        ],
+                        explanation: "s = v × t = 5 m/s × 10 s = 50 meter.",
+                        bonus: {
+                            text: "Berdasarkan tabel & grafik s-t sepeda tersebut, bagaimana bentuk grafik posisi terhadap waktu pada GLB?",
+                            options: [
+                                { label: "A. Garis lurus linier miring naik", correct: true },
+                                { label: "B. Garis melengkung/parabola", correct: false },
+                                { label: "C. Garis vertikal tegak lurus", correct: false },
+                                { label: "D. Garis acak acak-acakan", correct: false }
+                            ],
+                            explanation: "Grafik s-t GLB selalu berupa garis lurus miring karena pertambahan jarak sebanding dengan waktu."
+                        }
+                    }
+                ]
+            },
+            4: {
+                title: "TIKUNGAN GLBB",
+                zoneTitle: "ZONA 4",
+                story: "Mobil operasional sekolah bergerak dari gerbang depan. Kecepatan awalnya adalah 5 m/s. Pengemudi menekan pedal gas sehingga mobil mendapat percepatan tetap 2 m/s² selama 5 detik.",
+                materi: `
+                    <strong>GERAK LURUS BERUBAH BERATURAN (GLBB):</strong><br>
+                    • Gerak benda pada lintasan lurus dengan percepatan ($a$) konstan.<br>
+                    • Kecepatan berubah secara teratur setiap detiknya.<br>
+                    • Rumus utama: $v_t = v_0 + a \cdot t$.
+                `,
+                formula: "v_t = v_0 + (a × t) | v_t = Kecepatan Akhir",
+                clues: [
+                    "1. Diketahui: v₀ = 5 m/s, a = 2 m/s², t = 5 s.",
+                    "2. Hitung pertambahan kecepatan = a × t = 2 × 5 = 10 m/s.",
+                    "3. Kecepatan akhir = v₀ + 10 = 5 + 10 = 15 m/s."
+                ],
+                questions: [
+                    {
+                        text: "Berapakah kecepatan akhir mobil sekolah setelah dipercepat 5 detik?",
+                        options: [
+                            { label: "A. 10 m/s", correct: false },
+                            { label: "B. 12 m/s", correct: false },
+                            { label: "C. 15 m/s", correct: true },
+                            { label: "D. 25 m/s", correct: false }
+                        ],
+                        explanation: "v_t = v_0 + a.t = 5 + (2 × 5) = 15 m/s.",
+                        bonus: {
+                            text: "Apakah kendaraan mengalami GLB atau GLBB?",
+                            options: [
+                                { label: "A. GLB (Gerak Lurus Beraturan)", correct: false },
+                                { label: "B. GLBB (Gerak Lurus Berubah Beraturan)", correct: true },
+                                { label: "C. Gerak Parabola", correct: false },
+                                { label: "D. Gerak Melingkar Beraturan", correct: false }
+                            ],
+                            explanation: "Karena kecepatannya bertambah secara teratur akibat adanya percepatan konstan, gerak ini adalah GLBB."
+                        }
+                    }
+                ]
+            },
+            5: {
+                title: "MENARA GRAFIK",
+                zoneTitle: "ZONA 5",
+                story: "Kamu tiba di puncak Menara Grafik. Layar kontrol menampilkan grafik gerak kendaraan sekolah. Analisis pola grafik untuk menyelaraskan energi Kristal ke-5!",
+                materi: `
+                    <strong>MEMBACA GRAFIK GERAK:</strong><br>
+                    • <strong>Grafik s-t mendatar (horizontal):</strong> Benda Diam (kecepatan = 0).<br>
+                    • <strong>Grafik s-t garis lurus miring:</strong> Benda GLB (kecepatan konstan).<br>
+                    • <strong>Grafik v-t garis lurus miring naik:</strong> Benda GLBB Dipercepat ($a > 0$).<br>
+                    • <strong>Luas di bawah grafik v-t:</strong> Menyatakan jarak total ($s$).
+                `,
+                formula: "Benda Diam (v=0) | GLB (v konstan) | GLBB (a konstan)",
+                clues: [
+                    "1. Kecepatan konstan berarti nilai v tetap (tidak berubah seiring waktu).",
+                    "2. Percepatan tetap berarti grafik v-t memiliki kemiringan (gradien) garis lurus miring naik.",
+                    "3. Benda diam ditunjukkan posisi s yang tidak berubah."
+                ],
+                questions: [
+                    {
+                        text: "Tantangan 1: Deskripsi manakah yang tepat untuk grafik Posisi-Waktu (s-t) berbentuk garis mendatar sejajar sumbu waktu?",
+                        options: [
+                            { label: "A. Benda bergerak dengan kecepatan tinggi", correct: false },
+                            { label: "B. Benda sedang diam (tidak berpindah)", correct: true },
+                            { label: "C. Benda mengalami percepatan tetap", correct: false },
+                            { label: "D. Benda mengalami perlambatan", correct: false }
+                        ],
+                        explanation: "Jika grafik s-t mendatar, nilai posisi s konstan (tidak berubah seiring waktu), artinya benda diam."
+                    }
+                ]
+            },
+            6: {
+                title: "KASTEL GERAK",
+                zoneTitle: "ZONA FINAL",
+                story: "Selamat datang di KASTEL GERAK! Ini adalah ujian akhir integratif untuk mengembalikan seluruh energi Kristal Gerak SMUDAMA. Kamu akan menghadapi 5 tantangan kontekstual kehidupan sekolah berasrama!",
+                materi: "RANGKUMAN INTEGRATIF: Mengombinasikan seluruh pemahaman Jarak, Perpindahan, Kelajuan, Kecepatan, GLB, GLBB, dan Analisis Grafik.",
+                formula: "v = s/t | v_t = v_0 + a.t | s = v_0.t + 1/2.a.t²",
+                clues: [
+                    "1. Terapkan rumus dasar yang sesuai dengan situasi cerita.",
+                    "2. Perhatikan perbedaan skalar (jarak/kelajuan) dan vektor (perpindahan/kecepatan).",
+                    "3. Hitung dengan teliti sebelum memilih."
+                ],
+                questions: [
+                    // Challenge 1
+                    {
+                        text: "TANTANGAN 1 (Kantin & Lab): Seorang siswa berjalan dari Kamar Asrama ke Kantin sejauh 120m ke timur, lalu berjalan ke Laboratorium Fisika 50m ke utara. Berapakah PERPINDAHAN total siswa tersebut?",
+                        options: [
+                            { label: "A. 170 m", correct: false },
+                            { label: "B. 130 m", correct: true },
+                            { label: "C. 70 m", correct: false },
+                            { label: "D. 60 m", correct: false }
+                        ],
+                        explanation: "Gunakan dalil Pythagoras untuk dua lintasan tegak lurus: √(120² + 50²) = √(14400 + 2500) = √16900 = 130 meter."
+                    },
+                    // Challenge 2
+                    {
+                        text: "TANTANGAN 2 (Olahraga Lari): Pada kegiatan jalan sehat SMUDAMA, seorang guru menempuh jarak 600 meter dalam waktu 3 menit (180 detik). Berapakah kelajuan rata-ratanya?",
+                        options: [
+                            { label: "A. 2 m/s", correct: false },
+                            { label: "B. 3,33 m/s", correct: true },
+                            { label: "C. 5 m/s", correct: false },
+                            { label: "D. 10 m/s", correct: false }
+                        ],
+                        explanation: "v = s / t = 600 m / 180 s = 3,33 m/s."
+                    },
+                    // Challenge 3
+                    {
+                        text: "TANTANGAN 3 (Lift Gedung Serbaguna): Lift gedung serbaguna bergerak naik dari lantai 1 ke lantai 4 dengan kecepatan tetap 2 m/s tanpa percepatan. Manakah kategori gerak lift tersebut?",
+                        options: [
+                            { label: "A. Gerak Lurus Beraturan (GLB)", correct: true },
+                            { label: "B. Gerak Lurus Berubah Beraturan (GLBB)", correct: false },
+                            { label: "C. Gerak Jatuh Bebas", correct: false },
+                            { label: "D. Gerak Melingkar", correct: false }
+                        ],
+                        explanation: "Kecepatan tetap tanpa percepatan adalah ciri khas Gerak Lurus Beraturan (GLB)."
+                    },
+                    // Challenge 4
+                    {
+                        text: "TANTANGAN 4 (Bus Sekolah): Bus jemputan sekolah mula-mula diam (v₀ = 0), lalu dipercepat 3 m/s² selama 6 detik di jalan lurus. Berapakah kecepatan akhir bus tersebut?",
+                        options: [
+                            { label: "A. 9 m/s", correct: false },
+                            { label: "B. 12 m/s", correct: false },
+                            { label: "C. 18 m/s", correct: true },
+                            { label: "D. 36 m/s", correct: false }
+                        ],
+                        explanation: "v_t = v_0 + a.t = 0 + (3 × 6) = 18 m/s."
+                    },
+                    // Challenge 5
+                    {
+                        text: "TANTANGAN 5 (Analisis Grafik v-t): Sebuah grafik v-t menunjukkan garis mendatar lurus di angka v = 10 m/s dari t = 0 hingga t = 5 s. Berapakah luas daerah di bawah grafik (jarak total)?",
+                        options: [
+                            { label: "A. 2 m", correct: false },
+                            { label: "B. 15 m", correct: false },
+                            { label: "C. 50 m", correct: true },
+                            { label: "D. 100 m", correct: false }
+                        ],
+                        explanation: "Luas di bawah grafik v-t berbentuk persegi panjang: s = v × t = 10 × 5 = 50 meter."
+                    }
+                ]
+            }
+        };
+
+        function selectAvatar(emoji) {
+            gameState.avatar = emoji;
+            document.querySelectorAll('.avatar-btn').forEach(btn => {
+                if (btn.innerText === emoji) {
+                    btn.classList.add('border-indigo-500', 'bg-indigo-600');
+                    btn.classList.remove('border-transparent', 'bg-slate-700/80');
+                } else {
+                    btn.classList.remove('border-indigo-500', 'bg-indigo-600');
+                    btn.classList.add('border-transparent', 'bg-slate-700/80');
+                }
+            });
+            playBeep(600, 'sine', 0.05);
+        }
+
+        function startGame() {
+            const nameInput = document.getElementById('inputPlayerName').value.trim();
+            if (nameInput) {
+                gameState.playerName = nameInput;
+            }
+            
+            document.getElementById('dashName').innerText = gameState.playerName;
+            document.getElementById('dashAvatar').innerText = gameState.avatar;
+            
+            document.getElementById('screenWelcome').classList.add('hidden');
+            document.getElementById('playerDashboard').classList.remove('hidden');
+            document.getElementById('screenMap').classList.remove('hidden');
+            
+            updateDashboardUI();
+            playSuccessSound();
+        }
+
+        function updateDashboardUI() {
+            document.getElementById('dashHearts').innerText = gameState.hearts;
+            document.getElementById('dashXP').innerText = `${gameState.xp} XP`;
+            document.getElementById('dashCoins').innerText = gameState.coins;
+            document.getElementById('dashBadgeCount').innerText = `${gameState.badges.length}/6`;
+            
+            // Level Calculation
+            let levelName = "LEVEL 1: PEMULA";
+            if (gameState.xp >= 150) levelName = "LEVEL 3: MASTER";
+            else if (gameState.xp >= 60) levelName = "LEVEL 2: PENJELAJAH";
+            document.getElementById('dashLevel').innerText = levelName;
+
+            // Map Completion Progress Bar
+            const completedCount = gameState.zoneProgress.filter(Boolean).length;
+            const pct = Math.round((completedCount / 6) * 100);
+            document.getElementById('dashProgressPct').innerText = `${pct}%`;
+            document.getElementById('dashProgressBar').style.width = `${pct}%`;
+
+            // Update Map Unlock Visuals
+            for (let i = 1; i <= 6; i++) {
+                const card = document.getElementById(`cardZone${i}`);
+                const badge = document.getElementById(`badgeZone${i}`);
+                if (!card) continue;
+
+                if (i <= gameState.maxUnlockedZone) {
+                    card.classList.remove('opacity-60', 'cursor-not-allowed', 'bg-slate-900/40');
+                    card.classList.add('cursor-pointer', 'bg-indigo-950/40', 'border-indigo-500/50');
+                    card.setAttribute('onclick', `openZone(${i})`);
+
+                    if (gameState.zoneProgress[i - 1]) {
+                        badge.className = "text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold";
+                        badge.innerText = "SELESAI ✅";
+                    } else {
+                        badge.className = "text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold";
+                        badge.innerText = "TERBUKA";
+                    }
+                } else {
+                    card.classList.add('opacity-60', 'cursor-not-allowed', 'bg-slate-900/40');
+                    card.classList.remove('cursor-pointer', 'bg-indigo-950/40', 'border-indigo-500/50');
+                    card.removeAttribute('onclick');
+                    badge.className = "text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-bold";
+                    badge.innerText = "🔒 TERKUNCI";
+                }
+            }
+        }
+
+        function backToMap() {
+            document.getElementById('screenMission').classList.add('hidden');
+            document.getElementById('screenMap').classList.remove('hidden');
+            updateDashboardUI();
+            playBeep(400, 'sine', 0.05);
+        }
+
+        let animationFrameId = null;
+
+        function openZone(zoneNum) {
+            if (zoneNum > gameState.maxUnlockedZone) return;
+            
+            gameState.currentZone = zoneNum;
+            gameState.clueLevel = 0;
+            gameState.subStepIndex = 0;
+
+            document.getElementById('screenMap').classList.add('hidden');
+            document.getElementById('screenMission').classList.remove('hidden');
+            document.getElementById('feedbackBox').classList.add('hidden');
+            document.getElementById('btnRetryMission').classList.add('hidden');
+
+            const mData = missionsData[zoneNum];
+            document.getElementById('missionZoneTitle').innerText = mData.zoneTitle;
+            document.getElementById('missionHeader').innerText = mData.title;
+            document.getElementById('missionStory').innerText = mData.story;
+
+            renderQuestionStep();
+            renderMissionCanvas(zoneNum);
+            playBeep(500, 'sine', 0.1);
+        }
+
+        function renderQuestionStep() {
+            const z = gameState.currentZone;
+            const mData = missionsData[z];
+            const q = mData.questions[gameState.subStepIndex];
+
+            document.getElementById('questionText').innerText = q.text;
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 bg-slate-800/80 hover:bg-indigo-600/80 border border-slate-700 hover:border-indigo-400 rounded-xl text-left text-sm font-semibold text-slate-200 transition flex items-center justify-between group transform active:scale-98";
+                btn.innerHTML = `
+                    <span>${opt.label}</span>
+                    <i class="fas fa-chevron-right opacity-0 group-hover:opacity-100 transition text-amber-300"></i>
+                `;
+                btn.onclick = () => submitAnswer(opt.correct, q.explanation, q.bonus);
+                grid.appendChild(btn);
+            });
+        }
+
+        /* CANVAS RENDERER FOR PHYSICS ANIMATIONS */
+        function renderMissionCanvas(zoneNum) {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            
+            const canvas = document.getElementById('missionCanvas');
+            const ctx = canvas.getContext('2d');
+            const overlay = document.getElementById('dynamicHtmlOverlay');
+            overlay.classList.add('hidden');
+            overlay.innerHTML = '';
+
+            // Resize Canvas to parent width
+            canvas.width = canvas.parentElement.clientWidth - 32;
+            canvas.height = 200;
+
+            let pos = 20;
+            let speed = (zoneNum === 4) ? 0.5 : 1.5;
+            let timeStep = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Draw Track / Ground
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(0, 150, canvas.width, 50);
+                
+                // Track Markings
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([10, 10]);
+                ctx.beginPath();
+                ctx.moveTo(0, 175);
+                ctx.lineTo(canvas.width, 175);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                if (zoneNum === 1) {
+                    // Runner from Asrama to Lapangan
+                    ctx.font = '30px serif';
+                    ctx.fillText('🏠', 20, 140);
+                    ctx.fillText('🏃', pos, 140);
+                    ctx.fillText('🏃‍♂️', canvas.width - 60, 140);
+
+                    // Labels
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '12px Inter';
+                    ctx.fillText('Asrama (0m)', 10, 170);
+                    ctx.fillText('Lapangan (80m)', canvas.width - 90, 170);
+
+                    pos += speed;
+                    if (pos > canvas.width - 80 || pos < 20) speed = -speed;
+
+                } else if (zoneNum === 2) {
+                    // Oval Running Track Simulation
+                    ctx.strokeStyle = '#f59e0b';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.ellipse(canvas.width/2, 100, 120, 50, 0, 0, 2 * Math.PI);
+                    ctx.stroke();
+
+                    let angle = timeStep * 0.03;
+                    let x = canvas.width/2 + 120 * Math.cos(angle);
+                    let y = 100 + 50 * Math.sin(angle);
+
+                    ctx.font = '24px serif';
+                    ctx.fillText('🏃', x - 12, y + 8);
+
+                    ctx.fillStyle = '#cbd5e1';
+                    ctx.font = '12px Orbitron';
+                    ctx.fillText(`s = 200m | t = 40s`, canvas.width/2 - 60, 185);
+
+                } else if (zoneNum === 3) {
+                    // GLB Bicycle Motion
+                    ctx.font = '32px serif';
+                    ctx.fillText('🚲', pos, 140);
+
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.font = '12px Orbitron';
+                    ctx.fillText(`v = 5 m/s (Konstan)`, pos, 100);
+
+                    pos += 2;
+                    if (pos > canvas.width - 40) pos = 20;
+
+                    // Display GLB s-t Table Overlay
+                    overlay.classList.remove('hidden');
+                    overlay.innerHTML = `
+                        <div class="text-xs text-slate-300 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                            <span class="font-bold text-amber-300 block mb-1">📊 TABEL DATA POSISI-WAKTU (GLB):</span>
+                            <div class="grid grid-cols-6 gap-1 text-center font-orbitron text-[11px] bg-slate-900 p-1.5 rounded-lg border border-slate-800">
+                                <div>t (s)<br><span class="text-indigo-400">0 | 2 | 4 | 6 | 8 | 10</span></div>
+                                <div class="col-span-5">s (m)<br><span class="text-emerald-400">0m | 10m | 20m | 30m | 40m | 50m</span></div>
+                            </div>
+                        </div>
+                    `;
+
+                } else if (zoneNum === 4) {
+                    // GLBB Car Accelerating
+                    ctx.font = '36px serif';
+                    ctx.fillText('🚗', pos, 140);
+
+                    ctx.fillStyle = '#f43f5e';
+                    ctx.font = '12px Orbitron';
+                    ctx.fillText(`v₀=5 m/s | a=2 m/s²`, pos, 95);
+
+                    speed += 0.03; // Accelerating
+                    pos += speed;
+                    if (pos > canvas.width - 50) {
+                        pos = 20;
+                        speed = 0.5;
+                    }
+
+                } else if (zoneNum === 5) {
+                    // Graph Chart Canvas Rendering
+                    ctx.strokeStyle = '#6366f1';
+                    ctx.lineWidth = 3;
+                    
+                    // Axis
+                    ctx.beginPath();
+                    ctx.moveTo(40, 20);
+                    ctx.lineTo(40, 160);
+                    ctx.lineTo(canvas.width - 20, 160);
+                    ctx.stroke();
+
+                    // Line (GLB vs GLBB representation)
+                    ctx.strokeStyle = '#10b981';
+                    ctx.beginPath();
+                    ctx.moveTo(40, 160);
+                    ctx.lineTo(canvas.width - 40, 30);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.font = '11px Orbitron';
+                    ctx.fillText('Kecepatan (v)', 10, 20);
+                    ctx.fillText('Waktu (t)', canvas.width - 60, 180);
+
+                } else {
+                    // Zone 6 Final Castle Animation
+                    ctx.font = '50px serif';
+                    ctx.fillText('🏰', canvas.width/2 - 25, 120);
+
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.font = '13px Orbitron';
+                    ctx.fillText('FINAL TANTANGAN KASTEL GERAK', canvas.width/2 - 110, 175);
+                }
+
+                timeStep++;
+                animationFrameId = requestAnimationFrame(draw);
+            }
+
+            draw();
+        }
+
+        function submitAnswer(isCorrect, explanation, bonusQuestion) {
+            const fbBox = document.getElementById('feedbackBox');
+            fbBox.classList.remove('hidden', 'bg-emerald-950/80', 'border-emerald-500', 'bg-red-950/80', 'border-red-500', 'text-emerald-200', 'text-red-200');
+
+            if (isCorrect) {
+                playSuccessSound();
+                gameState.totalCorrect++;
+                gameState.xp += 10;
+                gameState.coins += 5;
+
+                fbBox.classList.add('bg-emerald-950/80', 'border-emerald-500', 'text-emerald-200');
+                fbBox.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <span class="text-2xl">🎉</span>
+                        <div>
+                            <strong class="text-emerald-300 font-bold text-base block">BENAR SEKALI! Kamu memahami konsep ini.</strong>
+                            <p class="mt-1 text-xs sm:text-sm leading-relaxed">${explanation}</p>
+                            <span class="inline-block mt-2 font-bold text-amber-300 text-xs">+10 XP • +5 Koin 🪙</span>
+                        </div>
+                    </div>
+                `;
+
+                // Handle Sub-Step or Mission Completion
+                setTimeout(() => {
+                    if (bonusQuestion) {
+                        // Render Bonus Question Step
+                        renderBonusStep(bonusQuestion);
+                    } else {
+                        const mData = missionsData[gameState.currentZone];
+                        if (gameState.subStepIndex < mData.questions.length - 1) {
+                            gameState.subStepIndex++;
+                            renderQuestionStep();
+                        } else {
+                            completeMission(gameState.currentZone);
+                        }
+                    }
+                }, 1800);
+
+            } else {
+                playErrorSound();
+                gameState.totalWrong++;
+                gameState.hearts--;
+                
+                fbBox.classList.add('bg-red-950/80', 'border-red-500', 'text-red-200');
+                fbBox.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <span class="text-2xl">💡</span>
+                        <div>
+                            <strong class="text-amber-300 font-bold text-base block">BELUM TEPAT. Coba perhatikan kembali konsepnya!</strong>
+                            <p class="mt-1 text-xs sm:text-sm leading-relaxed">Jangan menyerah! Klik tombol <strong>💡 Petunjuk</strong> jika memerlukan bantuan clue rumus.</p>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('btnRetryMission').classList.remove('hidden');
+
+                if (gameState.hearts <= 0) {
+                    setTimeout(() => {
+                        alert("❤️ Energi kamu habis! Sesi energi akan direfill agar petualangan tetap berlanjut.");
+                        gameState.hearts = 3;
+                        updateDashboardUI();
+                    }, 1000);
+                }
+            }
+
+            updateDashboardUI();
+        }
+
+        function renderBonusStep(bonus) {
+            document.getElementById('questionText').innerText = bonus.text;
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+
+            bonus.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 bg-slate-800/80 hover:bg-indigo-600/80 border border-slate-700 hover:border-indigo-400 rounded-xl text-left text-sm font-semibold text-slate-200 transition flex items-center justify-between group transform active:scale-98";
+                btn.innerHTML = `
+                    <span>${opt.label}</span>
+                    <i class="fas fa-chevron-right opacity-0 group-hover:opacity-100 transition text-amber-300"></i>
+                `;
+                btn.onclick = () => submitAnswer(opt.correct, bonus.explanation, null);
+                grid.appendChild(btn);
+            });
+        }
+
+        function retryCurrentMission() {
+            document.getElementById('feedbackBox').classList.add('hidden');
+            document.getElementById('btnRetryMission').classList.add('hidden');
+            renderQuestionStep();
+        }
+
+        function completeMission(zoneNum) {
+            gameState.zoneProgress[zoneNum - 1] = true;
+            
+            // Add Completion XP & Badges
+            const xpGains = { 1: 20, 2: 20, 3: 30, 4: 30, 5: 40, 6: 100 };
+            gameState.xp += xpGains[zoneNum] || 20;
+
+            const badge = badgeDefinitions[zoneNum];
+            if (badge && !gameState.badges.some(b => b.title === badge.title)) {
+                gameState.badges.push(badge);
+            }
+
+            if (zoneNum < 6) {
+                gameState.maxUnlockedZone = Math.max(gameState.maxUnlockedZone, zoneNum + 1);
+                updateDashboardUI();
+
+                // Alert Modal Success
+                showModal("🎉 MISI ZONA " + zoneNum + " SELESAI!", `
+                    <div class="text-center space-y-3 py-2">
+                        <div class="text-5xl">💎</div>
+                        <p class="font-bold text-emerald-300">Kamu berhasil mendapatkan Kristal Gerak Ke-${zoneNum}!</p>
+                        <p class="text-xs text-slate-300">Badge Diraih: <strong>${badge.icon} ${badge.title}</strong></p>
+                        <p class="text-xs text-amber-300 font-bold">+${xpGains[zoneNum]} Bonus Mission XP!</p>
+                    </div>
+                `);
+
+                setTimeout(() => {
+                    closeModal();
+                    backToMap();
+                }, 2200);
+
+            } else {
+                // Completed Final Mission!
+                updateDashboardUI();
+                showFinalResults();
+            }
+        }
+
+        function showFinalResults() {
+            document.getElementById('playerDashboard').classList.add('hidden');
+            document.getElementById('screenMission').classList.add('hidden');
+            document.getElementById('screenFinal').classList.remove('hidden');
+
+            document.getElementById('finalXP').innerText = `${gameState.xp} XP`;
+            
+            const totalQ = gameState.totalCorrect + gameState.totalWrong;
+            const accuracy = totalQ > 0 ? Math.round((gameState.totalCorrect / totalQ) * 100) : 100;
+            document.getElementById('finalAccuracy').innerText = `${accuracy}%`;
+            document.getElementById('finalBadges').innerText = `${gameState.badges.length}/6`;
+
+            // Grade & Evaluation System
+            let grade = "🌟 Sangat Baik";
+            let recText = "Luar biasa! Kamu menguasai seluruh konsep gerak lurus dengan sempurna. Teruskan minat tinggi dalam belajar Fisika!";
+            if (accuracy < 70) {
+                grade = "💡 Perlu Belajar Lagi";
+                recText = "Rekomendasi Pembelajaran: Pelajari kembali perbedaan besaran Skalar vs Vektor serta konsep persamaan GLBB $v_t = v_0 + a.t$.";
+            } else if (accuracy < 80) {
+                grade = "👍 Cukup";
+                recText = "Rekomendasi Pembelajaran: Pertajam keterampilan analisis grafik posisi-waktu ($s-t$) dan kecepatan-waktu ($v-t$).";
+            } else if (accuracy < 90) {
+                grade = "⭐ Baik";
+                recText = "Sangat bagus! Kamu memiliki pemahaman dasar dan numerasi fisika yang kokoh.";
+            }
+
+            document.getElementById('finalGrade').innerText = grade;
+            document.getElementById('evalRecommendation').innerHTML = `
+                <strong class="text-amber-300 block mb-1">EVALUASI PENGUASAAN FISIKA:</strong>
+                <p>${recText}</p>
+            `;
+
+            // Render Badge Showroom
+            const showroom = document.getElementById('badgeShowroom');
+            showroom.innerHTML = '';
+            gameState.badges.forEach(b => {
+                const tag = document.createElement('div');
+                tag.className = "px-3 py-1.5 rounded-xl bg-indigo-900/60 border border-indigo-500/40 text-xs font-semibold text-indigo-200 flex items-center space-x-1.5";
+                tag.innerHTML = `<span>${b.icon}</span><span>${b.title}</span>`;
+                showroom.appendChild(tag);
+            });
+
+            playSuccessSound();
+        }
+
+        function showClue() {
+            const mData = missionsData[gameState.currentZone];
+            const clueText = mData.clues[gameState.clueLevel] || mData.clues[mData.clues.length - 1];
+            
+            showModal("💡 PETUNJUK BERTAHAP", `
+                <div class="space-y-2">
+                    <span class="text-xs text-amber-400 font-bold block">Tingkat Petunjuk ${gameState.clueLevel + 1}/3:</span>
+                    <p class="text-sm bg-slate-950 p-3 rounded-xl border border-slate-800 text-slate-200">${clueText}</p>
+                </div>
+            `);
+
+            if (gameState.clueLevel < mData.clues.length - 1) gameState.clueLevel++;
+        }
+
+        function showMaterial() {
+            const mData = missionsData[gameState.currentZone];
+            showModal("📖 MATERI BRIEF FISIKA", mData.materi);
+        }
+
+        function showFormula() {
+            const mData = missionsData[gameState.currentZone];
+            showModal("🧮 RUMUS UTAMA", `
+                <div class="bg-indigo-950/80 p-4 rounded-xl border border-indigo-500/40 font-orbitron text-center text-amber-300 text-sm">
+                    ${mData.formula}
+                </div>
+            `);
+        }
+
+        function showModal(title, bodyHtml) {
+            document.getElementById('modalHeader').innerText = title;
+            document.getElementById('modalBody').innerHTML = bodyHtml;
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            playBeep(700, 'sine', 0.05);
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.add('hidden');
+        }
+
+        function restartGame() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
